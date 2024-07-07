@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Localization>
+  <Entry>
+    <Key>Title</Key>
+    <Value>Mana Mingle</Value>
+  </Entry>
+  <Entry>
+    <Key>Start</Key>
+    <Key>Start</Key>
+  </Entry>
+  <Entry>
+    <Key>Quit</Key>
+    <Key>Quit</Key>
+  </Entry>
+  <Entry>
+    <Key>Options</Key>
+    <Key>Options</Key>
+  </Entry>
+  <Entry>
+    <Key>Paused</Key>
+    <Key>Paused</Key>
+  </Entry>
+  <Entry>
+    <Key>Resume</Key>
+    <Key>Resume</Key>
+  </Entry>
+  <Entry>
+    <Key>Restart</Key>
+    <Key>Restart</Key>
+  </Entry>
+  <Entry>
+    <Key>Main Menu</Key>
+    <Key>Main Menu</Key>
+  </Entry>
+  <Entry>
+    <Key>Create</Key>
+    <Key>Create</Key>
+  </Entry>
+  <Entry>
+    <Key>Join</Key>
+    <Key>Join</Key>
+  </Entry>
+  <Entry>
+    <Key>Player</Key>
+    <Key>Player</Key>
+  </Entry>
+  <Entry>
+    <Key>IsReady</Key>
+    <Key>Is Ready</Key>
+  </Entry>
+  <Entry>
+    <Key>NotReady</Key>
+    <Key>Not Ready</Key>
+  </Entry>
+  <Entry>
+    <Key>Ready</Key>
+    <Key>Ready</Key>
+  </Entry>
+  <Entry>
+    <Key>Light</Key>
+    <Key>Light</Key>
+  </Entry>
+  <Entry>
+    <Key>Dark</Key>
+    <Key>Dark</Key>
+  </Entry>
+  <Entry>
+    <Key>EnterYourName</Key>
+    <Key>Enter Your Name...</Key>
+  </Entry>
+  <Entry>
+    <Key>Name</Key>
+    <Key>Name: </Key>
+  </Entry>
+  <Entry>
+    <Key>ChatHere</Key>
+    <Key>Chat Here...</Key>
+  </Entry>
+  <Entry>
+    <Key>Chat</Key>
+    <Key>Chat</Key>
+  </Entry>
+  <Entry>
+    <Key>Send</Key>
+    <Key>Send</Key>
+  </Entry>
+  <Entry>
+    <Key>Death</Key>
+    <Key>Death</Key>
+  </Entry>
+  <Entry>
+    <Key>Watch</Key>
+    <Key>Watch</Key>
+  </Entry>
+  <Entry>
+    <Key>Prev</Key>
+    <Key>Prev</Key>
+  </Entry>
+  <Entry>
+    <Key>Next</Key>
+    <Key>Next</Key>
+  </Entry>
+  <Entry>
+    <Key>Loading</Key>
+    <Key>Loading...</Key>
+  </Entry>
+  <Entry>
+    <key>Language</key>
+    <key>Language: English</key>
+  </Entry>
+  <Entry>
+    <Key>Victory</Key>
+    <Key>Victory</Key>
+  </Entry>
+  <Entry>
+    <Key>Congratulations</Key>
+    <Key>Congratulations! The trophy is YOURS!</Key>
+  </Entry>
+</Localization>
