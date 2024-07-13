@@ -4,17 +4,22 @@ using System.IO;
 using UnityEngine;
 using System.Xml.Serialization;
 using System.Linq;
+using UnityEngine.UI;
 
 public class QPanelController : MonoBehaviour
 {
     public static QPanelController instance { get; private set; }
+    public int escLayer;
 
     [SerializeField] private Card cardPrefab;
-    [SerializeField] private List<QPanel> qPanels;
+    [SerializeField] private Transform qPanel;
+    [SerializeField] private Transform buttons;
 
     private List<Card> cards;
-
+    
     private DateTime date;
+    private Button saveButton;
+    private Button archiveButton;
 
 
     private void OnGUI()
@@ -37,20 +42,41 @@ public class QPanelController : MonoBehaviour
         date = GameManager.instance.selectedDate;
         cards = new();
         Load();
+
+        escLayer = 0;
+
+        saveButton = buttons.Find("Save").GetComponent<Button>();
+        saveButton.onClick.AddListener(Save);
+        archiveButton = buttons.Find("Archive").GetComponent<Button>();
+    }
+
+    private void Update()
+    {
+        print(escLayer);
+        if (Input.GetKeyDown(KeyCode.Escape) && escLayer == 0)
+        {
+            SceneController.instance.LoadScene("Calendar");
+        }
     }
 
     public Card CreateCard(CardInfo cardInfo)
     {
-        return CreateCard(cardInfo.posX, cardInfo.posY, cardInfo.qLevel, cardInfo.content, cardInfo.deadline);
+        return CreateCard(cardInfo.posX, cardInfo.posY, cardInfo.qLevel, cardInfo.content, cardInfo.deadline, cardInfo.done);
     }
 
-    public Card CreateCard(float posX, float posY, int qLevel, string content = "", DateTime deadline = default)
+    public Card CreateCard(float posX, float posY, int qLevel, string content = "", DateTime deadline = default, bool done = false)
     {
         var card = Instantiate(cardPrefab, new(posX, posY), Quaternion.identity);
-        card.transform.SetParent(qPanels[qLevel - 1].transform, false);
-        card.Init(posX, posY, content, deadline, qLevel);
+        card.transform.SetParent(qPanel, false);
+        card.Init(posX, posY, content, deadline, qLevel, done);
         cards.Add(card);
         return card;
+    }
+
+    public void RemoveCard(Card card)
+    {
+        cards.Remove(card);
+        Destroy(card.gameObject);
     }
 
     public void Save()

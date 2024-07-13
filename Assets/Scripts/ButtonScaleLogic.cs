@@ -15,7 +15,6 @@ public class ButtonScaleLogic : MonoBehaviour, IPointerEnterHandler, IPointerExi
 
     public void OnPointerEnter(PointerEventData pointerEventData)
     {
-        transform.SetAsLastSibling();
         tweener?.Kill();
         tweener = transform.DOScale(new Vector3(origScale.x * 1.1f, origScale.y * 1.1f, origScale.z), ANIM_TIME);
     }
