@@ -7,10 +7,6 @@ public class QLevelVisualizer : MonoBehaviour, IScrollHandler
     public int qLevel { get; private set; }
     public UnityEvent<int> onQLevelChange;
     private GameObject cellOrig;
-    
-    private void Awake() {
-        onQLevelChange.AddListener((level)=> Debug.Log($"QLevel changed to {level}"));
-    }
 
     public void UpdateQLevel(int qLevel)
     {

@@ -12,10 +12,12 @@ public class QPanelController : MonoBehaviour
     public int escLayer;
 
     [SerializeField] private Card cardPrefab;
+    [SerializeField] private TakeawayCard takeawayCardPrefab;
     [SerializeField] private Transform qPanel;
     [SerializeField] private Transform buttons;
 
     private List<Card> cards;
+    private List<TakeawayCard> takeawayCards;
 
     private DateTime date;
     private Button saveButton;
@@ -41,6 +43,7 @@ public class QPanelController : MonoBehaviour
 
         date = GameManager.instance.selectedDate;
         cards = new();
+        takeawayCards = new();
         Load();
 
         escLayer = 0;
@@ -53,7 +56,6 @@ public class QPanelController : MonoBehaviour
 
     private void Update()
     {
-        print(escLayer);
         if (Input.GetKeyDown(KeyCode.Escape) && escLayer == 0)
         {
             SceneController.instance.LoadScene("Calendar");
@@ -65,6 +67,11 @@ public class QPanelController : MonoBehaviour
         return CreateCard(cardInfo.posX, cardInfo.posY, cardInfo.qLevel, cardInfo.content, cardInfo.deadline, cardInfo.done);
     }
 
+    public TakeawayCard CreateTakeawayCard(TakeawayCardInfo cardInfo)
+    {
+        return CreateTakeawayCard(cardInfo.posX, cardInfo.posY, cardInfo.content);
+    }
+
     public Card CreateCard(float posX, float posY, int qLevel, string content = "", DateTime deadline = default, bool done = false)
     {
         var card = Instantiate(cardPrefab, new(posX, posY), Quaternion.identity);
@@ -74,21 +81,48 @@ public class QPanelController : MonoBehaviour
         return card;
     }
 
+    public TakeawayCard CreateTakeawayCard(float posX, float posY, string content = "")
+    {
+        var card = Instantiate(takeawayCardPrefab, new(posX, posY), Quaternion.identity);
+        card.transform.SetParent(qPanel, false);
+        card.Init(posX, posY, content);
+        takeawayCards.Add(card);
+        return card;
+    }
+
     public void RemoveCard(Card card)
     {
         cards.Remove(card);
         Destroy(card.gameObject);
     }
 
+    public void RemoveTakeawayCard(TakeawayCard takeawayCard)
+    {
+        takeawayCards.Remove(takeawayCard);
+        Destroy(takeawayCard.gameObject);
+    }
+
     public void Save()
     {
-        string path = GetPath(date);
-        var serializer = new XmlSerializer(typeof(List<CardInfo>));
-        using var stream = new FileStream(path, FileMode.Create);
-        var cardInfos = cards.Select(card => card.cardInfo).ToList();
-        serializer.Serialize(stream, cardInfos);
+        {
+            string path = GetPath(date);
+            var serializer = new XmlSerializer(typeof(List<CardInfo>));
+            using var stream = new FileStream(path, FileMode.Create);
+            var cardInfos = cards.Select(card => card.info).Distinct().ToList();
+            serializer.Serialize(stream, cardInfos);
 
-        print("save card infos to " + path);
+            print("save card infos to " + path);
+        }
+
+        {
+            string path = GetPath(date, "takeaway");
+            var serializer = new XmlSerializer(typeof(List<TakeawayCardInfo>));
+            using var stream = new FileStream(path, FileMode.Create);
+            var cardInfos = takeawayCards.Select(card => card.info).Distinct().ToList();
+            serializer.Serialize(stream, cardInfos);
+
+            print("save takeaway card infos to " + path);
+        }
     }
 
     /// <summary>
@@ -96,25 +130,37 @@ public class QPanelController : MonoBehaviour
     /// </summary>
     public void Load()
     {
-        cards.Clear();
-        string path = GetPath(date);
-
-        print("load card infos from " + path);
-        if (!File.Exists(path))
         {
-            return;
+            cards.Clear();
+            string path = GetPath(date);
+            print("load card infos from " + path);
+            if (File.Exists(path))
+            {
+                var serializer = new XmlSerializer(typeof(List<CardInfo>));
+                using var stream = new FileStream(path, FileMode.Open);
+                var cardInfos = (List<CardInfo>)serializer.Deserialize(stream);
+                cardInfos.ForEach(cardInfo => CreateCard(cardInfo));
+            }
         }
 
-        var serializer = new XmlSerializer(typeof(List<CardInfo>));
-        using var stream = new FileStream(path, FileMode.Open);
-        var cardInfos = (List<CardInfo>)serializer.Deserialize(stream);
-        cardInfos.ForEach(cardInfo => CreateCard(cardInfo));
-        return;
+        {
+            takeawayCards.Clear();
+            string path = GetPath(date, "takeaway");
+            print("load takeaway card infos from " + path);
+            if (File.Exists(path))
+            {
+                var serializer = new XmlSerializer(typeof(List<TakeawayCardInfo>));
+                using var stream = new FileStream(path, FileMode.Open);
+                var cardInfos = (List<TakeawayCardInfo>)serializer.Deserialize(stream);
+                cardInfos.ForEach(cardInfo => CreateTakeawayCard(cardInfo));
+            }
+        }
     }
 
-    private string GetPath(DateTime date)
+    private string GetPath(DateTime date, string type = "")
     {
-        return Path.Combine(Application.persistentDataPath, date.ToString("yyyy-MM-dd") + ".xml");
+        string typeSuffix = type == "" ? "" : "_" + type;
+        return Path.Combine(Application.persistentDataPath, date.ToString("yyyy-MM-dd") + typeSuffix + ".xml");
     }
 
     /// <summary>
@@ -125,12 +171,22 @@ public class QPanelController : MonoBehaviour
         var nextDate = date.AddDays(1);
         var nextPath = GetPath(nextDate);
 
+        var nextDateInfos = new List<CardInfo>();
+        if (File.Exists(nextPath))
+        {
+            var sr = new XmlSerializer(typeof(List<CardInfo>));
+            using var str = new FileStream(nextPath, FileMode.Open);
+            nextDateInfos = (List<CardInfo>)sr.Deserialize(str);
+        }
+
         var serializer = new XmlSerializer(typeof(List<CardInfo>));
         using var stream = new FileStream(nextPath, FileMode.Create);
-        var cardInfos = cards.Select(card => card.cardInfo).ToList();
+        var cardInfos = cards.Select(card => card.info).ToList();
         var notDoneCardInfos = cardInfos.Where(cardInfo => !cardInfo.done).ToList();
-        serializer.Serialize(stream, notDoneCardInfos);
+        nextDateInfos = nextDateInfos.Concat(notDoneCardInfos).Distinct().ToList();
+        serializer.Serialize(stream, nextDateInfos);
 
-        print("save card infos to " + nextPath);
+        print(notDoneCardInfos.Count + " cards are copied to " + nextDate.ToString("yyyy-MM-dd"));
+
     }
 }
