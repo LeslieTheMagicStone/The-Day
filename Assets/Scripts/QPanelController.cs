@@ -16,7 +16,7 @@ public class QPanelController : MonoBehaviour
     [SerializeField] private Transform buttons;
 
     private List<Card> cards;
-    
+
     private DateTime date;
     private Button saveButton;
     private Button archiveButton;
@@ -48,6 +48,7 @@ public class QPanelController : MonoBehaviour
         saveButton = buttons.Find("Save").GetComponent<Button>();
         saveButton.onClick.AddListener(Save);
         archiveButton = buttons.Find("Archive").GetComponent<Button>();
+        archiveButton.onClick.AddListener(Archive);
     }
 
     private void Update()
@@ -81,7 +82,7 @@ public class QPanelController : MonoBehaviour
 
     public void Save()
     {
-        string path = GetPath();
+        string path = GetPath(date);
         var serializer = new XmlSerializer(typeof(List<CardInfo>));
         using var stream = new FileStream(path, FileMode.Create);
         var cardInfos = cards.Select(card => card.cardInfo).ToList();
@@ -90,10 +91,13 @@ public class QPanelController : MonoBehaviour
         print("save card infos to " + path);
     }
 
+    /// <summary>
+    /// Load card infos from the file and instantiate cards
+    /// </summary>
     public void Load()
     {
         cards.Clear();
-        string path = GetPath();
+        string path = GetPath(date);
 
         print("load card infos from " + path);
         if (!File.Exists(path))
@@ -108,8 +112,25 @@ public class QPanelController : MonoBehaviour
         return;
     }
 
-    private string GetPath()
+    private string GetPath(DateTime date)
     {
         return Path.Combine(Application.persistentDataPath, date.ToString("yyyy-MM-dd") + ".xml");
+    }
+
+    /// <summary>
+    /// Not done cards are copied to the next day
+    /// </summary>
+    private void Archive()
+    {
+        var nextDate = date.AddDays(1);
+        var nextPath = GetPath(nextDate);
+
+        var serializer = new XmlSerializer(typeof(List<CardInfo>));
+        using var stream = new FileStream(nextPath, FileMode.Create);
+        var cardInfos = cards.Select(card => card.cardInfo).ToList();
+        var notDoneCardInfos = cardInfos.Where(cardInfo => !cardInfo.done).ToList();
+        serializer.Serialize(stream, notDoneCardInfos);
+
+        print("save card infos to " + nextPath);
     }
 }

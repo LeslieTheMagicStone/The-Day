@@ -4,17 +4,13 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerDownHandler
+public class Card : MonoBehaviour, IPointerDownHandler
 {
     public CardInfo cardInfo => _cardInfo;
     private CardInfo _cardInfo;
     private TMP_InputField input;
     private TMP_Text deadlineText;
     private Toggle doneToggle;
-
-    private Vector2 startPosition;
-    private bool isDragging;
-    private Transform canvasTransform;
 
     private QLevelVisualizer qLevelVisualizer;
 
@@ -26,8 +22,6 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
         _cardInfo = new CardInfo(posX, posY, content, deadline, qLevel, done);
         input.onEndEdit.RemoveListener(UpdateContent);
         input.onEndEdit.AddListener(UpdateContent);
-
-        canvasTransform = GetComponentInParent<Canvas>().transform;
 
         // Visualize Deadline
         deadlineText = transform.Find("Deadline").GetComponent<TMP_Text>();
@@ -44,47 +38,25 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
         qLevelVisualizer.UpdateQLevel(qLevel);
         qLevelVisualizer.onQLevelChange.RemoveListener(UpdateQLevel);
         qLevelVisualizer.onQLevelChange.AddListener(UpdateQLevel);
+
+        // Drag and drop stuff
+        var dragAndDrop = GetComponent<DragAndDrop>();
+        dragAndDrop.onEndDrag.RemoveListener(UpdatePos);
+        dragAndDrop.onEndDrag.AddListener(UpdatePos);
     }
 
-    private void Update()
-    {
-        if (isDragging && Input.GetKeyDown(KeyCode.Escape))
-        {
-            transform.position = startPosition;
-            OnEndDrag(null);
-        }
-    }
 
-    public void OnBeginDrag(PointerEventData eventData)
-    {
-        QPanelController.instance.escLayer++;
-        transform.SetAsLastSibling();
-        startPosition = transform.position;
-        isDragging = true;
-    }
-
-    public void OnDrag(PointerEventData eventData)
-    {
-        if (canvasTransform == null) return;
-        if (!isDragging) return;
-
-        Vector2 move = eventData.delta / canvasTransform.localScale.x;
-        transform.position += (Vector3)move;
-    }
-
-    public void OnEndDrag(PointerEventData eventData)
-    {
-        if (!isDragging) return;
-        QPanelController.instance.escLayer--;
-        _cardInfo.posX = transform.position.x;
-        _cardInfo.posY = transform.position.y;
-        isDragging = false;
-    }
 
     public void OnPointerDown(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Right)
             QPanelController.instance.RemoveCard(this);
+    }
+
+    private void UpdatePos(float x, float y)
+    {
+        _cardInfo.posX = x;
+        _cardInfo.posY = y;
     }
 
     private void UpdateContent(string content)
