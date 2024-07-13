@@ -6,12 +6,10 @@ public class ButtonSFXLogic : MonoBehaviour, IPointerClickHandler, IPointerEnter
 {
     [SerializeField] private AudioClip OnFocusSFX;
     [SerializeField] private AudioClip OnClickSFX;
-    private Button button;
     private AudioSource audioSource;
 
     private void Awake()
     {
-        button = GetComponent<Button>();
         audioSource = GetComponent<AudioSource>();
     }
 

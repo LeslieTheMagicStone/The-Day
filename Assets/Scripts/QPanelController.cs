@@ -23,20 +23,6 @@ public class QPanelController : MonoBehaviour
     private Button saveButton;
     private Button archiveButton;
 
-
-    private void OnGUI()
-    {
-        if (GUI.Button(new Rect(10, 10, 100, 50), "Save"))
-        {
-            Save();
-        }
-        if (GUI.Button(new Rect(10, 70, 100, 50), "Load"))
-        {
-            cards.ForEach(card => Destroy(card.gameObject));
-            Load();
-        }
-    }
-
     private void Awake()
     {
         instance = this;
