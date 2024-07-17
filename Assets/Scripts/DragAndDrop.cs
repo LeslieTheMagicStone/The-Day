@@ -6,6 +6,7 @@ public class DragAndDrop : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 {
     public UnityEvent<float, float> onEndDrag;
     private Vector2 startPosition;
+    private Vector2 mouseOffset;
     private bool isDragging;
     private Transform canvasTransform;
 
@@ -28,6 +29,8 @@ public class DragAndDrop : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         QPanelController.instance.escLayer++;
         transform.SetAsLastSibling();
         startPosition = transform.position;
+        Vector2 mousePosition = Input.mousePosition;
+        mouseOffset = mousePosition - startPosition;
         isDragging = true;
     }
 
@@ -36,8 +39,11 @@ public class DragAndDrop : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         if (canvasTransform == null) return;
         if (!isDragging) return;
 
-        Vector2 move = eventData.delta / canvasTransform.localScale.x;
-        transform.position += (Vector3)move;
+        // Vector2 move = eventData.delta / canvasTransform.localScale.x;
+        // transform.position += (Vector3)move;
+
+        Vector2 mousePosition = Input.mousePosition;
+        transform.position = mousePosition - mouseOffset;
     }
 
     public void OnEndDrag(PointerEventData eventData)
