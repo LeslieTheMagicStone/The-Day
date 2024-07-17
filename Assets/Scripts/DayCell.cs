@@ -11,7 +11,9 @@ public class DayCell : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     private bool isSelected;
     private bool isWeekend;
 
-    public void Init(DateTime date,int day, bool isToday, bool isWeekend)
+    private GameObject checkmark;
+
+    public void Init(DateTime date, int day, bool isToday, bool isWeekend)
     {
         this.date = date;
         this.day = day;
@@ -24,8 +26,20 @@ public class DayCell : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         text.color = isToday ? Color.red : Color.black;
         text.fontStyle = isWeekend ? TMPro.FontStyles.Bold : TMPro.FontStyles.Normal;
 
-        GetComponent<Button>().onClick.AddListener(OnClick); 
+        GetComponent<Button>().onClick.AddListener(OnClick);
+
+        var dayInfo = GameManager.GetDayInfo(date);
+        checkmark = transform.Find("Checkmark").gameObject;
+        checkmark.SetActive(dayInfo.checkmarked);
+
     }
+
+    private void Update()
+    {
+        
+    }
+
+
 
     public void Select()
     {

@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Xml.Serialization;
 using System.Linq;
 using UnityEngine.UI;
+using TMPro;
 
 public class QPanelController : MonoBehaviour
 {
@@ -22,6 +23,8 @@ public class QPanelController : MonoBehaviour
     private DateTime date;
     private Button saveButton;
     private Button archiveButton;
+    private Button checkmarkButton;
+    private TMP_Text checkmarkText;
 
     private void Awake()
     {
@@ -38,6 +41,10 @@ public class QPanelController : MonoBehaviour
         saveButton.onClick.AddListener(Save);
         archiveButton = buttons.Find("Archive").GetComponent<Button>();
         archiveButton.onClick.AddListener(Archive);
+        checkmarkButton = buttons.Find("Checkmark").GetComponent<Button>();
+        checkmarkButton.onClick.AddListener(Checkmark);
+        checkmarkText = checkmarkButton.GetComponentInChildren<TMP_Text>();
+        checkmarkText.text = GetCheckmarkText(GameManager.GetDayInfo(date).checkmarked);
     }
 
     private void Update()
@@ -91,7 +98,7 @@ public class QPanelController : MonoBehaviour
     public void Save()
     {
         {
-            string path = GetPath(date);
+            string path = GameManager.GetPath(date);
             var serializer = new XmlSerializer(typeof(List<CardInfo>));
             using var stream = new FileStream(path, FileMode.Create);
             var cardInfos = cards.Select(card => card.info).Distinct().ToList();
@@ -101,7 +108,7 @@ public class QPanelController : MonoBehaviour
         }
 
         {
-            string path = GetPath(date, "takeaway");
+            string path = GameManager.GetPath(date, "takeaway");
             var serializer = new XmlSerializer(typeof(List<TakeawayCardInfo>));
             using var stream = new FileStream(path, FileMode.Create);
             var cardInfos = takeawayCards.Select(card => card.info).Distinct().ToList();
@@ -118,7 +125,7 @@ public class QPanelController : MonoBehaviour
     {
         {
             cards.Clear();
-            string path = GetPath(date);
+            string path = GameManager.GetPath(date);
             print("load card infos from " + path);
             if (File.Exists(path))
             {
@@ -131,7 +138,7 @@ public class QPanelController : MonoBehaviour
 
         {
             takeawayCards.Clear();
-            string path = GetPath(date, "takeaway");
+            string path = GameManager.GetPath(date, "takeaway");
             print("load takeaway card infos from " + path);
             if (File.Exists(path))
             {
@@ -143,11 +150,7 @@ public class QPanelController : MonoBehaviour
         }
     }
 
-    private string GetPath(DateTime date, string type = "")
-    {
-        string typeSuffix = type == "" ? "" : "_" + type;
-        return Path.Combine(Application.persistentDataPath, date.ToString("yyyy-MM-dd") + typeSuffix + ".xml");
-    }
+
 
     /// <summary>
     /// Not done cards are copied to the next day
@@ -155,7 +158,7 @@ public class QPanelController : MonoBehaviour
     private void Archive()
     {
         var nextDate = date.AddDays(1);
-        var nextPath = GetPath(nextDate);
+        var nextPath = GameManager.GetPath(nextDate);
 
         var nextDateInfos = new List<CardInfo>();
         if (File.Exists(nextPath))
@@ -174,5 +177,20 @@ public class QPanelController : MonoBehaviour
 
         print(notDoneCardInfos.Count + " cards are copied to " + nextDate.ToString("yyyy-MM-dd"));
 
+    }
+
+
+
+    private void Checkmark()
+    {
+        var info = GameManager.GetDayInfo(date);
+        info.checkmarked = !info.checkmarked;
+        GameManager.SetDayInfo(date, info);
+        checkmarkText.text = GetCheckmarkText(info.checkmarked);
+    }
+
+    private static string GetCheckmarkText(bool checkmarked)
+    {
+        return checkmarked ? "OvO" : "O^O";
     }
 }
