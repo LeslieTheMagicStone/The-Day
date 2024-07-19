@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -11,15 +12,15 @@ public class Card : MonoBehaviour, IPointerDownHandler
     private TMP_InputField input;
     private TMP_Text deadlineText;
     private Toggle doneToggle;
-
     private QLevelVisualizer qLevelVisualizer;
+    private GameObject focusFrame;
 
-    public void Init(float posX, float posY, string content, DateTime deadline, int qLevel, bool done = false)
+    public void Init(float posX, float posY, string content, DateTime deadline, int qLevel, bool done = false, bool isFocus = false)
     {
         input = GetComponentInChildren<TMP_InputField>();
         transform.position = new Vector2(posX, posY);
         input.text = content;
-        _info = new CardInfo(posX, posY, content, deadline, qLevel, done);
+        _info = new CardInfo(posX, posY, content, deadline, qLevel, done, isFocus);
         input.onEndEdit.RemoveListener(UpdateContent);
         input.onEndEdit.AddListener(UpdateContent);
 
@@ -39,6 +40,10 @@ public class Card : MonoBehaviour, IPointerDownHandler
         qLevelVisualizer.onQLevelChange.RemoveListener(UpdateQLevel);
         qLevelVisualizer.onQLevelChange.AddListener(UpdateQLevel);
 
+        // Visualize focus
+        focusFrame = transform.Find("Focus").gameObject;
+        SetFocus(isFocus);
+
         // Drag and drop stuff
         var dragAndDrop = GetComponent<DragAndDrop>();
         dragAndDrop.onEndDrag.RemoveListener(UpdatePos);
@@ -51,6 +56,20 @@ public class Card : MonoBehaviour, IPointerDownHandler
     {
         if (eventData.button == PointerEventData.InputButton.Right)
             QPanelController.instance.RemoveCard(this);
+        if (eventData.button == PointerEventData.InputButton.Left && eventData.clickCount == 1)
+        {
+            if (info.isFocus)
+                QPanelController.instance.SetFocusCard(null);
+            else
+                QPanelController.instance.SetFocusCard(this);
+        }
+    }
+
+    public void SetFocus(bool value)
+    {
+        _info.isFocus = value;
+        focusFrame.SetActive(value);
+        transform.localScale = value ? new Vector3(1.2f, 1.2f, 1.2f) : Vector3.one;
     }
 
     private void UpdatePos(float x, float y)

@@ -57,7 +57,7 @@ public class QPanelController : MonoBehaviour
 
     public Card CreateCard(CardInfo cardInfo)
     {
-        return CreateCard(cardInfo.posX, cardInfo.posY, cardInfo.qLevel, cardInfo.content, cardInfo.deadline, cardInfo.done);
+        return CreateCard(cardInfo.posX, cardInfo.posY, cardInfo.qLevel, cardInfo.content, cardInfo.deadline, cardInfo.done, cardInfo.isFocus);
     }
 
     public TakeawayCard CreateTakeawayCard(TakeawayCardInfo cardInfo)
@@ -65,11 +65,11 @@ public class QPanelController : MonoBehaviour
         return CreateTakeawayCard(cardInfo.posX, cardInfo.posY, cardInfo.content);
     }
 
-    public Card CreateCard(float posX, float posY, int qLevel, string content = "", DateTime deadline = default, bool done = false)
+    public Card CreateCard(float posX, float posY, int qLevel, string content = "", DateTime deadline = default, bool done = false, bool isFocus = false)
     {
         var card = Instantiate(cardPrefab, new(posX, posY), Quaternion.identity);
         card.transform.SetParent(qPanel, false);
-        card.Init(posX, posY, content, deadline, qLevel, done);
+        card.Init(posX, posY, content, deadline, qLevel, done, isFocus);
         cards.Add(card);
         return card;
     }
@@ -93,6 +93,11 @@ public class QPanelController : MonoBehaviour
     {
         takeawayCards.Remove(takeawayCard);
         Destroy(takeawayCard.gameObject);
+    }
+
+    public void SetFocusCard(Card card)
+    {
+        cards.ForEach(c => c.SetFocus(c == card));
     }
 
     public void Save()

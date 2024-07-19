@@ -10,8 +10,9 @@ public struct CardInfo
     public readonly string deadlineString => deadline == default ? "" : deadline.ToString("yyyy-MM-dd HH:mm:ss");
     public int qLevel;
     public bool done;
+    public bool isFocus;
 
-    public CardInfo(float posX, float posY, string content, DateTime deadline, int qLevel, bool done = false)
+    public CardInfo(float posX, float posY, string content, DateTime deadline, int qLevel, bool done = false, bool isFocus = false)
     {
         this.posX = posX;
         this.posY = posY;
@@ -19,5 +20,6 @@ public struct CardInfo
         this.deadline = deadline;
         this.qLevel = qLevel;
         this.done = done;
+        this.isFocus = isFocus;
     }
 }
